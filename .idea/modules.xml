@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/A1/.idea/A1.iml" filepath="$PROJECT_DIR$/A1/.idea/A1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/A2/.idea/A2.iml" filepath="$PROJECT_DIR$/A2/.idea/A2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/A3/.idea/A3.iml" filepath="$PROJECT_DIR$/A3/.idea/A3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/A4/.idea/A4.iml" filepath="$PROJECT_DIR$/A4/.idea/A4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/EECS-498-007-598-005-Deep-Learning-for-Computer-Vision-Fall-2020-solution.iml" filepath="$PROJECT_DIR$/.idea/EECS-498-007-598-005-Deep-Learning-for-Computer-Vision-Fall-2020-solution.iml" />
+    </modules>
+  </component>
+</project>
