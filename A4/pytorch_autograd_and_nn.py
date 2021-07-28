@@ -283,7 +283,16 @@ def initialize_three_layer_conv_part4():
   # Hint: nn.Sequential, Flatten (implemented at the start of Part IV)   
   ####################################################################################
   # Replace "pass" statement with your code
-  pass
+  model = nn.Sequential(OrderedDict([
+      ('conv1', nn.Conv2d(C, channel_1, kernel_size_1, padding = pad_size_1)),
+      ('relu1', nn.ReLU()),
+      ('conv2', nn.Conv2d(channel_1, channel_2, kernel_size_2, padding = pad_size_2)),
+      ('relu2', nn.ReLU()),
+      ('flatten', Flatten()),
+      ('fc', nn.Linear((H*W*channel_2), num_classes))
+  ]))
+
+  optimizer = optim.SGD(model.parameters(), lr=learning_rate, weight_decay = weight_decay, momentum = momentum, nesterov = True)
   ################################################################################
   #                                 END OF YOUR CODE                             
   ################################################################################
@@ -310,7 +319,20 @@ class PlainBlock(nn.Module):
     # Store the result in self.net.                                            
     ############################################################################
     # Replace "pass" statement with your code
-    pass
+    if downsample:
+      stride = 2
+    else:
+      stride = 1
+
+
+    self.net = nn.Sequential(OrderedDict([
+      ('bn1', nn.BatchNorm2d(Cin)),
+      ('relu1', nn.ReLU()),
+      ('conv1', nn.Conv2d(Cin, Cout, kernel_size = 3, stride= stride, padding=1)),
+      ('bn2', nn.BatchNorm2d(Cout)),
+      ('relu2', nn.ReLU()),
+      ('conv2', nn.Conv2d(Cout, Cout, kernel_size = 3, stride= 1, padding=1))
+    ]))
     ############################################################################
     #                                 END OF YOUR CODE                         #
     ############################################################################
@@ -334,7 +356,16 @@ class ResidualBlock(nn.Module):
     # Store the main block in self.block and the shortcut in self.shortcut.    #
     ############################################################################
     # Replace "pass" statement with your code
-    pass
+    # F(x)
+    self.block = PlainBlock(Cin, Cout, downsample)
+    # G(x)
+    if Cin == Cout and downsample is False:
+      self.shortcut = nn.Identity()
+    elif Cin != Cout and downsample is False:
+      self.shortcut = nn.Conv2d(Cin, Cout, kernel_size = 1, stride=1)
+    elif downsample is True:
+      self.shortcut = nn.Conv2d(Cin, Cout,  kernel_size = 1, stride=2)
+
     ############################################################################
     #                                 END OF YOUR CODE                         #
     ############################################################################
@@ -354,7 +385,11 @@ class ResNet(nn.Module):
     # Store the model in self.cnn.                                             #
     ############################################################################
     # Replace "pass" statement with your code
-    pass
+    blocks = [ResNetStem(Cin, stage_args[0][0])]
+    for arg in stage_args:
+      blocks.append(ResNetStage(*arg))
+
+    self.cnn = nn.Sequential(*blocks)
     ############################################################################
     #                                 END OF YOUR CODE                         #
     ############################################################################
@@ -367,7 +402,14 @@ class ResNet(nn.Module):
     # Store the output in `scores`.                                            #
     ############################################################################
     # Replace "pass" statement with your code
-    pass
+    x = self.cnn(x)
+
+    # add global average pooling(we can add it only in forwarld pass because there is no learnable parameters in pooling)
+    x = F.avg_pool2d(x, kernel_size = (x.shape[-2],x.shape[-1]))
+    
+    # final linear layers
+    x = flatten(x)
+    scores = self.fc(x)
     ############################################################################
     #                                 END OF YOUR CODE                         #
     ############################################################################
@@ -389,7 +431,26 @@ class ResidualBottleneckBlock(nn.Module):
     # Store the main block in self.block and the shortcut in self.shortcut.    #
     ############################################################################
     # Replace "pass" statement with your code
-    pass
+    if downsample:
+      stride = 2
+    else: 
+      stride = 1
+
+
+    self.block = nn.Sequential(OrderedDict([
+      ('bn1', nn.BatchNorm2d(Cin)),
+      ('relu1', nn.ReLU()),
+      ('conv1', nn.Conv2d(Cin, Cout//4, kernel_size=1, stride=stride, padding=0)),
+      ('bn2', nn.BatchNorm2d(Cout//4)),
+      ('relu2', nn.ReLU()),
+      ('conv2', nn.Conv2d(Cout//4, Cout//4, kernel_size = 3, stride= 1, padding=1)),
+      ('bn3', nn.BatchNorm2d(Cout//4)),
+      ('relu3', nn.ReLU()),
+      ('conv3', nn.Conv2d(Cout//4, Cout, kernel_size = 1, stride= 1, padding=0))
+    ]))
+
+
+    self.shortcut = ResidualBlock(Cin, Cout, downsample).shortcut
     ############################################################################
     #                                 END OF YOUR CODE                         #
     ############################################################################
